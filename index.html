@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Cosmic Earth - An interactive 3D visualization of a living planet">
+    <meta name="theme-color" content="#010102">
+    <title>🌍 Cosmic Earth - Interactive 3D Visualization</title>
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Import Map for Three.js -->
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+        }
+    }
+    </script>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="loading-content">
+            <div class="loading-spinner">
+                <div class="spinner"></div>
+            </div>
+            <h2>🌍 Initializing Cosmic Earth</h2>
+            <p class="loading-text">Generating planets and veins...</p>
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Screen -->
+    <div id="errorScreen" class="error-screen" style="display: none;">
+        <div class="error-content">
+            <h2>⚠️ System Error</h2>
+            <p id="errorMessage"></p>
+            <button class="error-btn" onclick="location.reload()">Reload Application</button>
+        </div>
+    </div>
+
+    <!-- Main Canvas -->
+    <canvas id="canvas"></canvas>
+
+    <!-- Theme Panel -->
+    <div id="theme-panel" class="theme-panel">
+        <div class="animating-border-btn">
+            <div class="btn-content">
+                <div class="thumbs-container">
+                    <div class="thumb active" data-theme="0" data-color="#00d2ff" title="🔥 Magma & Cyan"></div>
+                    <div class="thumb" data-theme="1" data-color="#ff00ff" title="💜 Neon Void"></div>
+                    <div class="thumb" data-theme="2" data-color="#ffdd00" title="☀️ Solar Flare"></div>
+                    <div class="thumb" data-theme="3" data-color="#00ff88" title="🌊 Deep Ocean"></div>
+                    <div class="thumb" data-theme="4" data-color="#ff1493" title="💖 Cosmic Nebula"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Control Panel -->
+    <div id="control-panel" class="control-panel">
+        <div class="control-header">
+            <h3>⚙️ Advanced Controls</h3>
+            <div class="header-buttons">
+                <button class="toggle-btn shortcuts-toggle" id="toggleShortcuts" title="Toggle Shortcuts">⌨️</button>
+                <button class="toggle-btn" id="toggleControls" title="Toggle Panel">−</button>
+            </div>
+        </div>
+        <div class="control-content">
+            <!-- VISUALIZATION SECTION -->
+            <div class="control-section">
+                <div class="section-header">🌍 Visualization</div>
+                <div class="control-group">
+                    <label>
+                        <input type="checkbox" id="showVeins" checked>
+                        Show Veins
+                    </label>
+                </div>
+                <div class="control-group">
+                    <label>
+                        <input type="checkbox" id="showGlobe" checked>
+                        Show Globe
+                    </label>
+                </div>
+                <div class="control-group">
+                    <label>
+                        <input type="checkbox" id="showVolcano" checked>
+                        Show Volcanoes
+                    </label>
+                </div>
+                <div class="control-group">
+                    <label>
+                        <input type="checkbox" id="showDust" checked>
+                        Show Dust Particles
+                    </label>
+                </div>
+                <div class="control-group">
+                    <label>
+                        Vein Density:
+                        <input type="range" id="veinDensity" min="30" max="200" step="10" value="120" class="slider">
+                        <span id="densityValue">120</span>
+                    </label>
+                </div>
+                <div class="control-group">
+                    <label>
+                        Particle Count:
+                        <input type="range" id="particleCount" min="500" max="5000" step="500" value="3000" class="slider">
+                        <span id="particleValue">3000</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- ANIMATION SECTION -->
+            <div class="control-section">
+                <div class="section-header">🎬 Animation</div>
+                <div class="control-group">
+                    <label>
+                        <input type="checkbox" id="autoRotate" checked>
+                        Auto Rotate
+                    </label>
+                </div>
+                <div class="control-group">
+                    <label>
+                        Speed:
+                        <input type="range" id="animationSpeed" min="0" max="3" step="0.1" value="1" class="slider">
+                        <span id="speedValue">1.0x</span>
+                    </label>
+                </div>
+                <div class="control-group">
+                    <label>
+                        Vein Flow Speed:
+                        <input type="range" id="veinSpeed" min="0.1" max="2" step="0.1" value="0.3" class="slider">
+                        <span id="veinSpeedValue">0.3x</span>
+                    </label>
+                </div>
+                <div class="control-group">
+                    <label>
+                        Rotation Speed:
+                        <input type="range" id="rotationSpeed" min="0.1" max="5" step="0.1" value="2" class="slider">
+                        <span id="rotSpeedValue">2.0x</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- EFFECTS SECTION -->
+            <div class="control-section">
+                <div class="section-header">✨ Effects</div>
+                <div class="control-group">
+                    <label>
+                        <input type="checkbox" id="bloomEffect" checked>
+                        Bloom Effect
+                    </label>
+                </div>
+                <div class="control-group">
+                    <label>
+                        Bloom Strength:
+                        <input type="range" id="bloomStrength" min="0.5" max="3" step="0.1" value="1.5" class="slider">
+                        <span id="bloomValue">1.5x</span>
+                    </label>
+                </div>
+                <div class="control-group">
+                    <label>
+                        <input type="checkbox" id="glowEffect" checked>
+                        Glow Effect
+                    </label>
+                </div>
+                <div class="control-group">
+                    <label>
+                        Fog Density:
+                        <input type="range" id="fogDensity" min="0" max="0.005" step="0.0005" value="0.0008" class="slider">
+                        <span id="fogValue">0.0008</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- COLORS SECTION -->
+            <div class="control-section">
+                <div class="section-header">🎨 Colors</div>
+                <div class="control-group">
+                    <label>
+                        Vein Color:
+                        <input type="color" id="veinColor" value="#00d2ff" class="color-input">
+                    </label>
+                </div>
+                <div class="control-group">
+                    <label>
+                        Core Color:
+                        <input type="color" id="coreColor" value="#ff5500" class="color-input">
+                    </label>
+                </div>
+                <div class="control-group">
+                    <label>
+                        Dust Color:
+                        <input type="color" id="dustColor" value="#223355" class="color-input">
+                    </label>
+                </div>
+            </div>
+
+            <!-- CAMERA SECTION -->
+            <div class="control-section">
+                <div class="section-header">📷 Camera</div>
+                <div class="control-group">
+                    <label>
+                        <input type="checkbox" id="dampingEnabled" checked>
+                        Smooth Damping
+                    </label>
+                </div>
+                <div class="control-group">
+                    <label>
+                        Zoom Speed:
+                        <input type="range" id="zoomSpeed" min="1" max="10" step="0.5" value="3" class="slider">
+                        <span id="zoomValue">3.0x</span>
+                    </label>
+                </div>
+                <div class="control-group">
+                    <button id="resetView" class="control-btn">🔄 Reset View</button>
+                </div>
+            </div>
+
+            <!-- SYSTEM SECTION -->
+            <div class="control-section">
+                <div class="section-header">⚡ System</div>
+                <div class="control-group">
+                    <label>
+                        <input type="checkbox" id="showStats" checked>
+                        Show Stats
+                    </label>
+                </div>
+                <div class="control-group">
+                    <label>
+                        <input type="checkbox" id="vsyncEnabled" checked>
+                        V-Sync
+                    </label>
+                </div>
+                <div class="control-group">
+                    <button id="fullscreenBtn" class="control-btn">⛶ Fullscreen</button>
+                    <button id="resetAll" class="control-btn danger">🔴 Reset All</button>
+                </div>
+            </div>
+
+            <!-- SHORTCUTS SECTION (HIDDEN BY DEFAULT) -->
+            <div class="control-section keyboard-hints" id="shortcutsSection" style="display: none;">
+                <div class="section-header">⌨️ Keyboard Shortcuts</div>
+                <div class="shortcuts-list">
+                    <div class="shortcut-item"><kbd>Space</kbd> Toggle Rotation</div>
+                    <div class="shortcut-item"><kbd>B</kbd> Toggle Bloom</div>
+                    <div class="shortcut-item"><kbd>V</kbd> Toggle Veins</div>
+                    <div class="shortcut-item"><kbd>D</kbd> Toggle Dust</div>
+                    <div class="shortcut-item"><kbd>G</kbd> Toggle Globe</div>
+                    <div class="shortcut-item"><kbd>L</kbd> Toggle Glow</div>
+                    <div class="shortcut-item"><kbd>R</kbd> Reset Camera</div>
+                    <div class="shortcut-item"><kbd>S</kbd> Toggle Stats</div>
+                    <div class="shortcut-item"><kbd>F</kbd> Fullscreen</div>
+                    <div class="shortcut-item"><kbd>H</kbd> Show Shortcuts</div>
+                    <div class="shortcut-item"><kbd>+</kbd> Increase Speed</div>
+                    <div class="shortcut-item"><kbd>−</kbd> Decrease Speed</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Panel -->
+    <div id="statsPanel" class="stats-panel">
+        <div class="stat-item">FPS: <span id="fps">60</span></div>
+        <div class="stat-item">Memory: <span id="memory">0</span> MB</div>
+        <div class="stat-item">Vertices: <span id="vertices">0</span></div>
+        <div class="stat-item">Triangles: <span id="triangles">0</span></div>
+    </div>
+
+    <!-- Main Script -->
+    <script type="module" src="script.js"></script>
+</body>
+</html>
